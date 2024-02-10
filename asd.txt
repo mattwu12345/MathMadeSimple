@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Game</title>
+<style>
+  body {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background-color: #3498db; /* Blue */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  #container {
+    text-align: center;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 20px;
+  }
+  #problem {
+    font-size: 48px;
+    margin-bottom: 30px;
+    color: #2c3e50; /* Dark gray */
+  }
+  #options {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  .option {
+    font-size: 36px;
+    padding: 15px 30px;
+    background-color: #2ecc71; /* Green */
+    color: #fff;
+    border: 2px solid #27ae60; /* Dark green */
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  .option:hover {
+    background-color: #27ae60; /* Dark green */
+  }
+  #feedback {
+    font-size: 28px;
+    margin-top: 20px;
+    color: #e74c3c; /* Red */
+  }
+  #congrats {
+    font-size: 36px;
+    color: #f39c12; /* Orange */
+    display: none;
+  }
+  select {
+    font-size: 24px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 2px solid #2c3e50; /* Dark gray */
+    background-color: #fff;
+    color: #2c3e50; /* Dark gray */
+  }
+</style>
+</head>
+<body>
+  <div id="container">
+    <h1>Math Game</h1>
+    <div id="problem"></div>
+    <div id="options"></div>
+    <div id="feedback"></div>
+    <div id="congrats">Correct!</div>
+
+    <p>Choose Difficulty:
+      <select id="grade" onchange="generateNewProblem()">
+        <option value="K">Easy</option>
+        <option value="1">Medium</option>
+        <option value="2">Hard</option>
+        <option value="3">Extreme</option>
+      </select>
+    </p>
+  </div>
+
+  <script>
+    function generateProblem(grade) {
+      var num1, num2, operator, symbol;
+      switch (grade) {
+        case "K":
+          num1 = Math.floor(Math.random() * 5) + 1;
+          num2 = Math.floor(Math.random() * 5) + 1;
+          operator = "+";
+          symbol = "Addition";
+          break;
+        case "1":
+          num1 = Math.floor(Math.random() * 10) + 1;
+          num2 = Math.floor(Math.random() * 10) + 1;
+          operator = "-";
+          symbol = "Subtraction";
+          // Ensure no negative solutions for subtraction
+          if (num1 < num2) {
+            var temp = num1;
+            num1 = num2;
+            num2 = temp;
+          }
+          break;
+        case "2":
+          num1 = Math.floor(Math.random() * 10) + 1;
+          num2 = Math.floor(Math.random() * 10) + 1;
+          operator = "×";
+          symbol = "Multiplication";
+          break;
+        case "3":
+          num2 = Math.floor(Math.random() * 9) + 1; // Ensure divisor is not zero
+          num1 = num2 * (Math.floor(Math.random() * 10) + 1); // Ensure divisible result
+          operator = "÷";
+          symbol = "Division";
+          break;
+      }
+      return {num1: num1, num2: num2, operator: operator, symbol: symbol};
+    }
+
+    function checkAnswer(selectedOption, correctAnswer) {
+      var feedback = document.getElementById("feedback");
+      var congrats = document.getElementById("congrats");
+
+      if (selectedOption == correctAnswer) {
+        feedback.textContent = "";
+        congrats.style.display = "block";
+        setTimeout(function() {
+          congrats.style.display = "none";
+        }, 1000); // Hide congrats message after 1 second
+        generateNewProblem(); // Display a new problem
+      } else {
+        feedback.textContent = "Incorrect. Try again!";
+        congrats.style.display = "none";
+      }
+    }
+
+    function generateNewProblem() {
+      var grade = document.getElementById("grade").value;
+      var problem = generateProblem(grade);
+      var problemText = "What is " + problem.num1 + " " + problem.operator + " " + problem.num2 + "?";
+      var optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = ""; // Clear previous options
+
+      // Generate multiple choice options
+      var correctAnswer;
+      switch (problem.operator) {
+        case "+":
+          correctAnswer = problem.num1 + problem.num2;
+          break;
+        case "-":
+          correctAnswer = problem.num1 - problem.num2;
+          break;
+        case "×":
+          correctAnswer = problem.num1 * problem.num2;
+          break;
+        case "÷":
+          correctAnswer = Math.floor(problem.num1 / problem.num2); // Ensure integer division
+          break;
+      }
+
+      var options = [];
+      options.push(correctAnswer);
+      while (options.length < 4) {
+        var option;
+        switch (problem.operator) {
+          case "+":
+            option = (Math.floor(Math.random() * 10) + 1) + (Math.floor(Math.random() * 10) + 1);
+            break;
+          case "-":
+            option = (Math.floor(Math.random() * 10) + 1) + problem.num2;
+            break;
+          case "×":
+            option = (Math.floor(Math.random() * 10) + 1) * (Math.floor(Math.random() * 10) + 1);
+            break;
+          case "÷":
+            option = Math.floor((Math.floor(Math.random() * 10) + 1) / (Math.floor(Math.random() * 9) + 1)); // Ensure integer division
+            break;
+        }
+        if (options.indexOf(option) === -1) {
+          options.push(option);
+        }
+      }
+
+      // Shuffle options
+      options.sort(() => Math.random() - 0.5);
+
+      options.forEach(option => {
+        var optionButton = document.createElement("button");
+        optionButton.textContent = option;
+        optionButton.classList.add("option");
+        optionButton.onclick = function() {
+          checkAnswer(option, correctAnswer);
+        };
+        optionsDiv.appendChild(optionButton);
+      });
+
+      var problemDiv = document.getElementById("problem");
+      problemDiv.textContent = problemText;
+      var feedbackDiv = document.getElementById("feedback");
+      feedbackDiv.textContent = "";
+    }
+
+    // Generate a starting problem when the page loads
+    window.onload = generateNewProblem;
+  </script>
+</body>
+</html>
